@@ -11,13 +11,12 @@ import (
 
 func main() {
 
-	engine := &engine.Engine{}
-	engine.Initialize(80, 50, 800, 500, 10)
+	engine := engine.NewEngine(80, 50, 800, 500, 10)
 
 	ebiten.SetWindowSize(engine.GetSize())
 	ebiten.SetWindowTitle("Golang RogueLikeDev Tutorial")
 
-	if err := ebiten.RunGame(engine); err != nil {
+	if err := ebiten.RunGame(&engine); err != nil {
 		log.Fatal(err)
 	}
 

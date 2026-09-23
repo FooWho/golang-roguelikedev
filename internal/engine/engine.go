@@ -22,21 +22,17 @@ type Engine struct {
 	tileSize     int
 }
 
-func (e *Engine) Initialize(
-	gridWidth int,
-	gridHeight int,
-	screenWidth int,
-	screenHeight int,
-	tileSize int,
-) {
-	e.gridWidth = gridWidth
-	e.gridHeight = gridHeight
-	e.screenWidth = screenWidth
-	e.screenHeight = screenHeight
-	e.tileSize = tileSize
-	e.tileSet = loadTileset()
-	e.playerX = (gridWidth / 2)
-	e.playerY = (gridHeight / 2)
+func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int, tileSize int) Engine {
+	return Engine{
+		gridWidth:    gridWidth,
+		gridHeight:   gridHeight,
+		screenWidth:  screenWidth,
+		screenHeight: screenHeight,
+		tileSize:     tileSize,
+		tileSet:      loadTileset(),
+		playerX:      gridWidth / 2,
+		playerY:      gridHeight / 2,
+	}
 }
 
 func (e *Engine) GetSize() (int, int) {
