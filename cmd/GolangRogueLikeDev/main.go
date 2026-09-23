@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const (
@@ -21,32 +20,16 @@ const (
 type Game struct {
 	playerX int
 	playerY int
+	tileSet *ebiten.Image
 }
 
 func (g *Game) Update() error {
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowUp) || inpututil.IsKeyJustPressed(ebiten.KeyW) {
-		if g.playerY > 0 {
-			g.playerY--
-		}
+	a, err := g.EventHandler()
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowDown) || inpututil.IsKeyJustPressed(ebiten.KeyS) {
-		if g.playerY < gridHeight-1 {
-			g.playerY++
-		}
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft) || inpututil.IsKeyJustPressed(ebiten.KeyA) {
-		if g.playerX > 0 {
-			g.playerX--
-		}
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowRight) || inpututil.IsKeyJustPressed(ebiten.KeyD) {
-		if g.playerX < gridWidth-1 {
-			g.playerX++
-		}
+	if a != nil {
+		a.Perform(g)
 	}
 
 	return nil
@@ -63,7 +46,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	rect := image.Rect(spriteX, spriteY, spriteX+tileSize, spriteY+tileSize)
 
-	tileSprite := tileset.SubImage(rect).(*ebiten.Image)
+	tileSprite := g.tileSet.SubImage(rect).(*ebiten.Image)
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(g.playerX*tileSize), float64(g.playerY*tileSize))
@@ -75,16 +58,13 @@ func (g *Game) Layout(outsideWidth int, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
 }
 
-var tileset *ebiten.Image
-
 func main() {
 
 	game := &Game{
 		playerX: int(gridWidth / 2),
 		playerY: int(gridHeight / 2),
+		tileSet: loadTileset(),
 	}
-
-	loadTileset()
 
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Golang RogueLikeDev Tutorial")
@@ -95,8 +75,8 @@ func main() {
 
 }
 
-func loadTileset() {
-	file, err := os.Open("assets/dejavu10x10_gs_tc.png")
+func loadTileset() *ebiten.Image {
+	file, err := os.Open("/home/jelison/Workspace/GolangRogueLikeDev/assets/dejavu10x10_gs_tc.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -107,5 +87,5 @@ func loadTileset() {
 		log.Fatal(err)
 	}
 
-	tileset = ebiten.NewImageFromImage(img)
+	return ebiten.NewImageFromImage(img)
 }
