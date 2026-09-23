@@ -24,27 +24,27 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
-	// Move Up
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyArrowUp) || inpututil.IsKeyJustPressed(ebiten.KeyW) {
-		if g.playerY > 0 { // Prevent moving off the top edge
+		if g.playerY > 0 {
 			g.playerY--
 		}
 	}
-	// Move Down
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyArrowDown) || inpututil.IsKeyJustPressed(ebiten.KeyS) {
-		if g.playerY < gridHeight-1 { // Prevent moving off the bottom edge
+		if g.playerY < gridHeight-1 {
 			g.playerY++
 		}
 	}
-	// Move Left
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft) || inpututil.IsKeyJustPressed(ebiten.KeyA) {
-		if g.playerX > 0 { // Prevent moving off the left edge
+		if g.playerX > 0 {
 			g.playerX--
 		}
 	}
-	// Move Right
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyArrowRight) || inpututil.IsKeyJustPressed(ebiten.KeyD) {
-		if g.playerX < gridWidth-1 { // Prevent moving off the right edge
+		if g.playerX < gridWidth-1 {
 			g.playerX++
 		}
 	}
@@ -71,7 +71,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.DrawImage(tileSprite, op)
 }
 
-func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+func (g *Game) Layout(outsideWidth int, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
 }
 
@@ -80,8 +80,8 @@ var tileset *ebiten.Image
 func main() {
 
 	game := &Game{
-		playerX: 40,
-		playerY: 25,
+		playerX: int(gridWidth / 2),
+		playerY: int(gridHeight / 2),
 	}
 
 	loadTileset()
