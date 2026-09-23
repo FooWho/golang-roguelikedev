@@ -1,4 +1,4 @@
-module github.com/FooWho/GolangRogueLikeDev
+module github.com/FooWho/golang-roguelikedev
 
 go 1.25.5
 
