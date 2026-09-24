@@ -5,23 +5,29 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-func (g *Game) EventHandler() (Action, error) {
-	keys := make([]ebiten.Key, 0, 5)
-	keys = inpututil.AppendJustPressedKeys(keys)
+func (g *Game) EventHandler() Action {
+	keys := inpututil.AppendJustPressedKeys(nil)
 
 	if len(keys) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	switch keys[0] {
 	case ebiten.KeyArrowUp, ebiten.KeyW:
-		return &MovementAction{dx: 0, dy: -1}, nil
+		action := NewMovementAction(0, -1)
+		return &action
 	case ebiten.KeyArrowDown, ebiten.KeyS:
-		return &MovementAction{dx: 0, dy: 1}, nil
+		action := NewMovementAction(0, 1)
+		return &action
 	case ebiten.KeyArrowLeft, ebiten.KeyA:
-		return &MovementAction{dx: -1, dy: 0}, nil
+		action := NewMovementAction(-1, 0)
+		return &action
 	case ebiten.KeyArrowRight, ebiten.KeyD:
-		return &MovementAction{dx: 1, dy: 0}, nil
+		action := NewMovementAction(1, 0)
+		return &action
+	case ebiten.KeyEscape:
+		action := NewEscapeAction()
+		return &action
 	}
-	return nil, nil
+	return nil
 }

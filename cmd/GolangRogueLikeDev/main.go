@@ -20,33 +20,30 @@ const (
 type Game struct {
 	playerX int
 	playerY int
-	tileSet *ebiten.Image
+	tiles   []*ebiten.Image
 }
 
 func (g *Game) Update() error {
-	a, err := g.EventHandler()
-	if err != nil {
-		log.Fatal(err)
+	action := g.EventHandler()
+	if action == nil {
+		return nil
 	}
-	if a != nil {
-		a.Perform(g)
+	if action != nil {
+		switch v := action.(type) {
+		case *MovementAction:
+			g.playerX += v.dx
+			g.playerY += v.dy
+		case *EscapeAction:
+			return ebiten.Termination
+		default:
+		}
 	}
-
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-
-	tilesPerRow := 32
 	char := '@'
-	charIndex := int(char) - 32
-
-	spriteX := (charIndex % tilesPerRow) * tileSize
-	spriteY := (charIndex / tilesPerRow) * tileSize
-
-	rect := image.Rect(spriteX, spriteY, spriteX+tileSize, spriteY+tileSize)
-
-	tileSprite := g.tileSet.SubImage(rect).(*ebiten.Image)
+	tileSprite := g.tiles[char]
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(g.playerX*tileSize), float64(g.playerY*tileSize))
@@ -63,19 +60,19 @@ func main() {
 	game := &Game{
 		playerX: int(gridWidth / 2),
 		playerY: int(gridHeight / 2),
-		tileSet: loadTileset(),
+		tiles:   loadTileset(),
 	}
 
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Golang RogueLikeDev Tutorial")
 
-	if err := ebiten.RunGame(game); err != nil {
+	if err := ebiten.RunGame(game); err != nil && err != ebiten.Termination {
 		log.Fatal(err)
 	}
 
 }
 
-func loadTileset() *ebiten.Image {
+func loadTileset() []*ebiten.Image {
 	file, err := os.Open("/home/jelison/Workspace/GolangRogueLikeDev/assets/dejavu10x10_gs_tc.png")
 	if err != nil {
 		log.Fatal(err)
@@ -87,5 +84,19 @@ func loadTileset() *ebiten.Image {
 		log.Fatal(err)
 	}
 
-	return ebiten.NewImageFromImage(img)
+	spriteSheet := ebiten.NewImageFromImage(img)
+	tiles := make([]*ebiten.Image, 256)
+	tilesPerRow := 32
+
+	for ascii := 32; ascii < 256; ascii++ {
+		sheetIndex := ascii - 32
+
+		spriteX := (sheetIndex % tilesPerRow) * tileSize
+		spriteY := (sheetIndex / tilesPerRow) * tileSize
+		rect := image.Rect(spriteX, spriteY, spriteX+tileSize, spriteY+tileSize)
+
+		tiles[ascii] = spriteSheet.SubImage(rect).(*ebiten.Image)
+	}
+
+	return tiles
 }
