@@ -12,13 +12,14 @@ import (
 )
 
 func (e *Engine) Draw(screen *ebiten.Image) {
-	char := '@'
-	tileSprite := e.tiles[char]
-
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(e.playerX*e.tileSize), float64(e.playerY*e.tileSize))
 
-	screen.DrawImage(tileSprite, op)
+	for _, entity := range e.entities {
+		op.GeoM.Reset()
+		op.GeoM.Translate(float64(entity.x*e.tileSize), float64(entity.y*e.tileSize))
+		tileSprite := e.tiles[entity.visual.char]
+		screen.DrawImage(tileSprite, op)
+	}
 }
 
 func (e *Engine) Layout(outsideWidth int, outsideHeight int) (int, int) {

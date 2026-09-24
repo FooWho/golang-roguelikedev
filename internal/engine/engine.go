@@ -14,10 +14,15 @@ type Engine struct {
 	screenHeight int
 	tileSize     int
 	keys         []ebiten.Key
+	entities     []Entity
 }
 
 func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int, tileSize int) Engine {
 	tiles := loadTileset(tileSize)
+
+	player := NewEntity(gridWidth/2, gridHeight/2, NewVisual('@', NewColor(255, 255, 255)))
+	entities := make([]Entity, 0, 10)
+	entities = append(entities, player)
 
 	return Engine{
 		gridWidth:    gridWidth,
@@ -29,6 +34,7 @@ func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int,
 		playerX:      gridWidth / 2,
 		playerY:      gridHeight / 2,
 		keys:         make([]ebiten.Key, 0, 5),
+		entities:     entities,
 	}
 }
 
