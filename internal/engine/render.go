@@ -12,17 +12,8 @@ import (
 )
 
 func (e *Engine) Draw(screen *ebiten.Image) {
-
-	tilesPerRow := 32
 	char := '@'
-	charIndex := int(char) - 32
-
-	spriteX := (charIndex % tilesPerRow) * e.tileSize
-	spriteY := (charIndex / tilesPerRow) * e.tileSize
-
-	rect := image.Rect(spriteX, spriteY, spriteX+e.tileSize, spriteY+e.tileSize)
-
-	tileSprite := e.tileSet.SubImage(rect).(*ebiten.Image)
+	tileSprite := e.tiles[char]
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(e.playerX*e.tileSize), float64(e.playerY*e.tileSize))
@@ -41,22 +32,26 @@ func (e *Engine) IsOnScreen(x int, y int) bool {
 	return false
 }
 
-func (e *Engine) MoveEntity(dx int, dy int) {
-	newX := e.playerX + dx
-	newY := e.playerY + dy
-	if e.IsOnScreen(newX, newY) {
-		e.playerX += dx
-		e.playerY += dy
-	}
-}
-
-func loadTileset() *ebiten.Image {
+func loadTileset(tileSize int) []*ebiten.Image {
 	img, _, err := image.Decode(bytes.NewReader(assets.TilesetData))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return ebiten.NewImageFromImage(img)
+	spriteSheet := ebiten.NewImageFromImage(img)
+	tiles := make([]*ebiten.Image, 256)
+	tilesPerRow := 32
+
+	for ascii := 32; ascii < 256; ascii++ {
+		sheetIndex := ascii - 32
+		spriteX := (sheetIndex % tilesPerRow) * tileSize
+		spriteY := (sheetIndex / tilesPerRow) * tileSize
+		rect := image.Rect(spriteX, spriteY, spriteX+tileSize, spriteY+tileSize)
+
+		tiles[ascii] = spriteSheet.SubImage(rect).(*ebiten.Image)
+	}
+
+	return tiles
 }
 
 func (e *Engine) GetSize() (int, int) {

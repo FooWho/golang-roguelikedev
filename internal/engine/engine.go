@@ -7,34 +7,43 @@ import (
 type Engine struct {
 	playerX      int
 	playerY      int
-	tileSet      *ebiten.Image
+	tiles        []*ebiten.Image
 	gridWidth    int
 	gridHeight   int
 	screenWidth  int
 	screenHeight int
 	tileSize     int
+	keys         []ebiten.Key
 }
 
 func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int, tileSize int) Engine {
+	tiles := loadTileset(tileSize)
+
 	return Engine{
 		gridWidth:    gridWidth,
 		gridHeight:   gridHeight,
 		screenWidth:  screenWidth,
 		screenHeight: screenHeight,
 		tileSize:     tileSize,
-		tileSet:      loadTileset(),
+		tiles:        tiles,
 		playerX:      gridWidth / 2,
 		playerY:      gridHeight / 2,
+		keys:         make([]ebiten.Key, 0, 5),
 	}
 }
 
 func (e *Engine) Update() error {
-	a, err := GetAction()
-	if err != nil {
-		return err
-	}
-	if a != nil {
-		a.Perform(e)
+	action := e.GetAction()
+
+	if action == nil {
+		return nil
+	} else {
+		switch v := action.(type) {
+		case *MovementAction:
+			v.Perform(e)
+		case EscapeAction:
+			return ebiten.Termination
+		}
 	}
 
 	return nil

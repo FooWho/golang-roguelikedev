@@ -9,15 +9,26 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+const (
+	gridWidth    = 80
+	gridHeight   = 50
+	tilesize     = 10
+	screenWidth  = gridWidth * tilesize
+	screenHeight = gridHeight * tilesize
+)
+
 func main() {
 
-	engine := engine.NewEngine(80, 50, 800, 500, 10)
+	engine := engine.NewEngine(gridWidth, gridHeight, screenWidth, screenHeight, tilesize)
 
 	ebiten.SetWindowSize(engine.GetSize())
 	ebiten.SetWindowTitle("Golang RogueLikeDev Tutorial")
 
 	if err := ebiten.RunGame(&engine); err != nil {
-		log.Fatal(err)
+		if err != ebiten.Termination {
+			log.Fatal(err)
+		}
+
 	}
 
 }

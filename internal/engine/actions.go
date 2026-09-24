@@ -1,10 +1,12 @@
 package engine
 
-type GameEngine interface {
-	MoveEntity(dx int, dy int)
-	IsOnScreen(x int, y int) bool
+type Action interface {
+	IsAction() bool
 }
 
-type Action interface {
-	Perform(e GameEngine)
+type EscapeAction struct {
+}
+
+func (e EscapeAction) IsAction() bool {
+	return true
 }
