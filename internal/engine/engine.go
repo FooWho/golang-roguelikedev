@@ -5,8 +5,6 @@ import (
 )
 
 type Engine struct {
-	playerX      int
-	playerY      int
 	tiles        []*ebiten.Image
 	gridWidth    int
 	gridHeight   int
@@ -14,43 +12,57 @@ type Engine struct {
 	screenHeight int
 	tileSize     int
 	keys         []ebiten.Key
-	entities     []Entity
+	player       *Player
+	actors       []Actor
+	renderables  []Renderable
 }
 
-func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int, tileSize int) Engine {
+func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int, tileSize int) *Engine {
 	tiles := loadTileset(tileSize)
 
-	player := NewEntity(gridWidth/2, gridHeight/2, NewVisual('@', NewColor(255, 255, 255)))
-	entities := make([]Entity, 0, 10)
-	entities = append(entities, player)
+	pe := NewEntity(gridWidth/2, gridHeight/2, NewVisual('@', NewColor(255, 255, 255)))
+	player := NewPlayer(&pe)
 
-	return Engine{
+	actors := make([]Actor, 0, 100)
+	actors = append(actors, player)
+
+	renderables := make([]Renderable, 0, 100)
+	renderables = append(renderables, player)
+
+	return &Engine{
 		gridWidth:    gridWidth,
 		gridHeight:   gridHeight,
 		screenWidth:  screenWidth,
 		screenHeight: screenHeight,
 		tileSize:     tileSize,
 		tiles:        tiles,
-		playerX:      gridWidth / 2,
-		playerY:      gridHeight / 2,
 		keys:         make([]ebiten.Key, 0, 5),
-		entities:     entities,
+		player:       player,
+		actors:       actors,
+		renderables:  renderables,
 	}
 }
 
 func (e *Engine) Update() error {
-	action := e.GetAction()
+	playerAction := e.GetPlayerAction()
 
-	if action == nil {
+	if playerAction == nil {
 		return nil
-	} else {
-		switch v := action.(type) {
-		case *MovementAction:
-			v.Perform(e)
-		case EscapeAction:
-			return ebiten.Termination
-		}
+	}
+	err := playerAction.Perform(e.player, e)
+	if err != nil {
+		return err
+	}
+
+	for i := 1; i < len(e.actors); i++ {
+		monster := e.actors[i]
+		monsterAction := monster.GetAction(e)
+		monsterAction.Perform(monster, e)
 	}
 
 	return nil
+}
+
+func (e *Engine) GetPlayer() *Player {
+	return e.player
 }

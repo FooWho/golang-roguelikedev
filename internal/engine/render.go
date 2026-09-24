@@ -14,10 +14,10 @@ import (
 func (e *Engine) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 
-	for _, entity := range e.entities {
+	for _, renderable := range e.renderables {
 		op.GeoM.Reset()
-		op.GeoM.Translate(float64(entity.x*e.tileSize), float64(entity.y*e.tileSize))
-		tileSprite := e.tiles[entity.visual.char]
+		op.GeoM.Translate(float64(renderable.GetX()*e.tileSize), float64(renderable.GetY()*e.tileSize))
+		tileSprite := e.tiles[renderable.GetVisual().char]
 		screen.DrawImage(tileSprite, op)
 	}
 }

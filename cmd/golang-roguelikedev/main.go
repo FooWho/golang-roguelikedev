@@ -24,7 +24,7 @@ func main() {
 	ebiten.SetWindowSize(engine.GetSize())
 	ebiten.SetWindowTitle("Golang RogueLikeDev Tutorial")
 
-	if err := ebiten.RunGame(&engine); err != nil {
+	if err := ebiten.RunGame(engine); err != nil {
 		if err != ebiten.Termination {
 			log.Fatal(err)
 		}
