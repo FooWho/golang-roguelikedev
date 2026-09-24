@@ -1,4 +1,4 @@
-package actions
+package engine
 
 type GameEngine interface {
 	MoveEntity(dx int, dy int)

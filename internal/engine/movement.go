@@ -1,4 +1,4 @@
-package actions
+package engine
 
 type MovementAction struct {
 	dx int

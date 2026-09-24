@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"log"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -31,9 +29,9 @@ func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int,
 }
 
 func (e *Engine) Update() error {
-	a, err := e.EventHandler()
+	a, err := GetAction()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	if a != nil {
 		a.Perform(e)

@@ -1,9 +1,12 @@
 package engine
 
 import (
+	"bytes"
+	_ "embed"
 	"image"
 	"log"
-	"os"
+
+	"github.com/FooWho/golang-roguelikedev/assets"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -48,13 +51,7 @@ func (e *Engine) MoveEntity(dx int, dy int) {
 }
 
 func loadTileset() *ebiten.Image {
-	file, err := os.Open("/home/jelison/Workspace/GolangRogueLikeDev/assets/dejavu10x10_gs_tc.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	img, _, err := image.Decode(file)
+	img, _, err := image.Decode(bytes.NewReader(assets.TilesetData))
 	if err != nil {
 		log.Fatal(err)
 	}
