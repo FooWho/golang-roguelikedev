@@ -30,16 +30,28 @@ func NewMovementAction(dx int, dy int) *MovementAction {
 }
 
 func (m *MovementAction) Perform(actor Actor, engine *Engine) error {
-	entity := actor.GetEntity()
-	newX := entity.x + m.dx
-	newY := entity.y + m.dy
+	newX := actor.GetX() + m.dx
+	newY := actor.GetY() + m.dy
 
 	if engine.IsOnScreen(newX, newY) {
-		entity.x = newX
-		entity.y = newY
+		actor.SetPosition(newX, newY)
 	}
 	return nil
 }
 
 // Interface Guard
 var _ Action = (*MovementAction)(nil)
+
+type WaitAction struct {
+}
+
+func NewWaitAction() *WaitAction {
+	return &WaitAction{}
+}
+
+func (w *WaitAction) Perform(actor Actor, engine *Engine) error {
+	return nil
+}
+
+// Interface Guard
+var _ Action = (*WaitAction)(nil)

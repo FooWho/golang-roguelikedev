@@ -18,6 +18,11 @@ func (e *Entity) GetY() int {
 	return e.y
 }
 
+func (e *Entity) SetPosition(x int, y int) {
+	e.x = x
+	e.y = y
+}
+
 func (e *Entity) GetVisual() Visual {
 	return e.visual
 }
@@ -27,21 +32,26 @@ var _ Renderable = (*Entity)(nil)
 
 type Actor interface {
 	GetAction(engine *Engine) Action
-	//GetEntity() *Entity
+	GetX() int
+	GetY() int
+	SetPosition(x int, y int)
 }
 
 type Monster struct {
 	*Entity
 }
 
-func (m *Monster) GetAction(engine *Engine) Action {
-	return (Action)(nil)
+func NewMonster(e *Entity) *Monster {
+	return &Monster{Entity: e}
 }
 
-/*
-func (m *Monster) GetEntity() *Entity {
-	return m.Entity
-}*/
+func (m *Monster) GetAction(engine *Engine) Action {
+	return NewWaitAction()
+}
+
+// Interface Guard
+var _ Actor = (*Monster)(nil)
+var _ Renderable = (*Monster)(nil)
 
 type Player struct {
 	*Entity
@@ -55,10 +65,9 @@ func (p *Player) GetAction(engine *Engine) Action {
 	return engine.GetPlayerAction()
 }
 
-/*
-func (p *Player) GetEntity() *Entity {
-	return p.Entity
-}*/
+// Interface Guard
+var _ Actor = (*Player)(nil)
+var _ Renderable = (*Player)(nil)
 
 type Renderable interface {
 	GetX() int
