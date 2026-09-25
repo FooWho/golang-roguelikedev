@@ -30,3 +30,6 @@ go.work.sum
 # Editor/IDE
 # .idea/
 .vscode/
+
+# Art resources that I don't think are distributable
+assets/Full.png

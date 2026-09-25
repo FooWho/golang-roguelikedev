@@ -47,10 +47,23 @@ func (e *Engine) Draw(screen *ebiten.Image) {
 	}
 
 	for _, renderable := range e.renderables {
+		vis := renderable.GetVisual()
+
 		op.GeoM.Reset()
+		op.GeoM.Scale(float64(e.tileSize), float64(e.tileSize))
 		op.GeoM.Translate(float64(renderable.GetX()*e.tileSize), float64(renderable.GetY()*e.tileSize))
 
-		vis := renderable.GetVisual()
+		op.ColorScale.Reset()
+		op.ColorScale.Scale(
+			float32(vis.bg.red)/255.0,
+			float32(vis.bg.green)/255.0,
+			float32(vis.bg.blue)/255.0,
+			1,
+		)
+		screen.DrawImage(whitePixel, op)
+
+		op.GeoM.Reset()
+		op.GeoM.Translate(float64(renderable.GetX()*e.tileSize), float64(renderable.GetY()*e.tileSize))
 
 		op.ColorScale.Reset()
 		op.ColorScale.Scale(
@@ -76,46 +89,44 @@ func (e *Engine) IsOnScreen(x int, y int) bool {
 	return x >= 0 && x < e.gridWidth && y >= 0 && y < e.gridHeight
 }
 
-func loadTileset(tileSize int) []*ebiten.Image {
-	img, _, err := image.Decode(bytes.NewReader(assets.TilesetData))
+type SpriteSheet struct {
+	Image   *ebiten.Image
+	Sprites map[string]*ebiten.Image
+}
+
+func loadTileset(tileSize int) *SpriteSheet {
+	img, _, err := image.Decode(bytes.NewReader(assets.FullSpriteSheet))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	bounds := img.Bounds()
-	transparentImg := image.NewRGBA(bounds)
+	sheet := ebiten.NewImageFromImage(img)
+	sprites := make(map[string]*ebiten.Image)
 
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			pixelColor := img.At(x, y)
-			r, g, b, _ := pixelColor.RGBA()
-
-			// If the pixel is pure black (0, 0, 0)
-			if r == 0 && g == 0 && b == 0 {
-				// Make it fully transparent
-				transparentImg.Set(x, y, color.Transparent)
-			} else {
-				// Keep the original white character pixel
-				transparentImg.Set(x, y, pixelColor)
-			}
-		}
+	extractSprite := func(name string, gridX, gridY int) {
+		pixelX := gridX * tileSize
+		pixelY := gridY * tileSize
+		rect := image.Rect(pixelX, pixelY, pixelX+tileSize, pixelY+tileSize)
+		sprites[name] = sheet.SubImage(rect).(*ebiten.Image)
 	}
 
-	// Use our new transparent image instead of the original
-	spriteSheet := ebiten.NewImageFromImage(transparentImg)
-	tiles := make([]*ebiten.Image, 256)
-	tilesPerRow := 32
+	// --- Map your specific sprites ---
+	// Look at the sprite sheet and count the grid cells!
+	// (Assuming 16x16 tiles, adjust gridX/gridY as needed based on the sheet)
 
-	for ascii := 32; ascii < 256; ascii++ {
-		sheetIndex := ascii - 32
-		spriteX := (sheetIndex % tilesPerRow) * tileSize
-		spriteY := (sheetIndex / tilesPerRow) * tileSize
-		rect := image.Rect(spriteX, spriteY, spriteX+tileSize, spriteY+tileSize)
+	// Map Tiles
+	extractSprite("wall", 0, 0)  // Example: Top left corner wall block
+	extractSprite("floor", 0, 8) // Example: The blank dark floor tile
 
-		tiles[ascii] = spriteSheet.SubImage(rect).(*ebiten.Image)
+	// Entities
+	extractSprite("player", 0, 24)   // Example: The first human frame
+	extractSprite("skeleton", 0, 16) // Example: The first skeleton frame
+	extractSprite("slime", 4, 18)    // Example: The green slime frame
+
+	return &SpriteSheet{
+		Image:   sheet,
+		Sprites: sprites,
 	}
-
-	return tiles
 }
 
 func (e *Engine) GetSize() (int, int) {

@@ -12,7 +12,7 @@ import (
 const (
 	gridWidth    = 80
 	gridHeight   = 50
-	tilesize     = 10
+	tilesize     = 16
 	screenWidth  = gridWidth * tilesize
 	screenHeight = gridHeight * tilesize
 )

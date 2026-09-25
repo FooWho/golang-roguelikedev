@@ -25,7 +25,7 @@ func NewGameMap(width int, height int) *GameMap {
 }
 
 func (gm *GameMap) Fill() {
-	tile := NewTile(NewVisual('.', Color{red: 50, green: 50, blue: 100}, Color{0, 100, 75}), true, true)
+	tile := NewTile(NewVisual(' ', Color{red: 0, green: 0, blue: 0}, Color{255, 255, 255}), true, true)
 
 	for y := 0; y < gm.height; y++ {
 		for x := 0; x < gm.width; x++ {

@@ -20,7 +20,7 @@ type Engine struct {
 func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int, tileSize int) *Engine {
 	tiles := loadTileset(tileSize)
 
-	pe := NewEntity(gridWidth/2, gridHeight/2, NewVisual('@', NewColor(255, 255, 255), NewColor(150, 150, 150)))
+	pe := NewEntity(gridWidth/2, gridHeight/2, NewVisual('3', NewColor(255, 255, 255), NewColor(0, 0, 0)))
 	player := NewPlayer(&pe)
 
 	actors := make([]Actor, 0, 100)
