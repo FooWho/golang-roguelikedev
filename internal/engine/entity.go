@@ -1,5 +1,10 @@
 package engine
 
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
+)
+
 type Entity struct {
 	x      int
 	y      int
@@ -55,14 +60,33 @@ var _ Renderable = (*Monster)(nil)
 
 type Player struct {
 	*Entity
+	keys []ebiten.Key
 }
 
 func NewPlayer(e *Entity) *Player {
-	return &Player{Entity: e}
+	return &Player{Entity: e, keys: make([]ebiten.Key, 0, 5)}
 }
 
 func (p *Player) GetAction(engine *Engine) Action {
-	return engine.GetPlayerAction()
+	p.keys = inpututil.AppendJustPressedKeys(p.keys[:0])
+
+	if len(p.keys) == 0 {
+		return nil
+	}
+
+	switch p.keys[0] {
+	case ebiten.KeyArrowUp, ebiten.KeyW:
+		return NewMovementAction(0, -1)
+	case ebiten.KeyArrowDown, ebiten.KeyS:
+		return NewMovementAction(0, 1)
+	case ebiten.KeyArrowLeft, ebiten.KeyA:
+		return NewMovementAction(-1, 0)
+	case ebiten.KeyArrowRight, ebiten.KeyD:
+		return NewMovementAction(1, 0)
+	case ebiten.KeyEscape:
+		return NewEscapeAction()
+	}
+	return nil
 }
 
 // Interface Guard
@@ -82,8 +106,8 @@ type Visual struct {
 
 type Color struct {
 	red   int
-	blue  int
 	green int
+	blue  int
 }
 
 func NewColor(r int, g int, b int) Color {

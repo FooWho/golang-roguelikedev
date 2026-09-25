@@ -11,7 +11,6 @@ type Engine struct {
 	screenWidth  int
 	screenHeight int
 	tileSize     int
-	keys         []ebiten.Key
 	player       *Player
 	actors       []Actor
 	renderables  []Renderable
@@ -36,7 +35,6 @@ func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int,
 		screenHeight: screenHeight,
 		tileSize:     tileSize,
 		tiles:        tiles,
-		keys:         make([]ebiten.Key, 0, 5),
 		player:       player,
 		actors:       actors,
 		renderables:  renderables,
@@ -44,7 +42,7 @@ func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int,
 }
 
 func (e *Engine) Update() error {
-	playerAction := e.GetPlayerAction()
+	playerAction := e.player.GetAction(e)
 
 	if playerAction == nil {
 		return nil
@@ -57,7 +55,10 @@ func (e *Engine) Update() error {
 	for i := 1; i < len(e.actors); i++ {
 		monster := e.actors[i]
 		monsterAction := monster.GetAction(e)
-		monsterAction.Perform(monster, e)
+		err = monsterAction.Perform(monster, e)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

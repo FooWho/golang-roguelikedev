@@ -17,7 +17,21 @@ func (e *Engine) Draw(screen *ebiten.Image) {
 	for _, renderable := range e.renderables {
 		op.GeoM.Reset()
 		op.GeoM.Translate(float64(renderable.GetX()*e.tileSize), float64(renderable.GetY()*e.tileSize))
-		tileSprite := e.tiles[renderable.GetVisual().char]
+
+		vis := renderable.GetVisual()
+
+		op.ColorScale.Reset()
+		op.ColorScale.Scale(
+			float32(vis.color.red)/255.0,
+			float32(vis.color.green)/255.0,
+			float32(vis.color.blue)/255.0,
+			1,
+		)
+		charIndex := vis.char
+		if charIndex < 0 || int(charIndex) >= len(e.tiles) {
+			charIndex = '?'
+		}
+		tileSprite := e.tiles[charIndex]
 		screen.DrawImage(tileSprite, op)
 	}
 }
@@ -27,10 +41,7 @@ func (e *Engine) Layout(outsideWidth int, outsideHeight int) (int, int) {
 }
 
 func (e *Engine) IsOnScreen(x int, y int) bool {
-	if x >= 0 && x < e.gridWidth && y >= 0 && y < e.gridHeight {
-		return true
-	}
-	return false
+	return x >= 0 && x < e.gridWidth && y >= 0 && y < e.gridHeight
 }
 
 func loadTileset(tileSize int) []*ebiten.Image {
