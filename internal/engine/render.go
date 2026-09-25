@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"image"
+	"image/color"
 	"log"
 
 	"github.com/FooWho/golang-roguelikedev/assets"
@@ -11,8 +12,39 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+var whitePixel *ebiten.Image
+
+func init() {
+	whitePixel = ebiten.NewImage(1, 1)
+	whitePixel.Fill(color.White)
+}
+
 func (e *Engine) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
+
+	for y := 0; y < e.gridHeight; y++ {
+		for x := 0; x < e.gridWidth; x++ {
+			tile := e.gameMap.tiles[y*e.gridWidth+x]
+			vis := tile.visual
+
+			op.GeoM.Reset()
+			op.GeoM.Scale(float64(e.tileSize), float64(e.tileSize))
+			op.GeoM.Translate(float64(x*e.tileSize), float64(y*e.tileSize))
+
+			op.ColorScale.Reset()
+			op.ColorScale.Scale(float32(vis.bg.red)/255.0, float32(vis.bg.green)/255.0, float32(vis.bg.blue)/255.0, 1)
+
+			screen.DrawImage(whitePixel, op)
+
+			op.GeoM.Reset()
+			op.GeoM.Translate(float64(x*e.tileSize), float64(y*e.tileSize))
+
+			op.ColorScale.Reset()
+			op.ColorScale.Scale(float32(vis.fg.red)/255.0, float32(vis.fg.green)/255.0, float32(vis.fg.blue)/255.0, 1)
+
+			screen.DrawImage(e.tiles[vis.char], op)
+		}
+	}
 
 	for _, renderable := range e.renderables {
 		op.GeoM.Reset()
@@ -22,9 +54,9 @@ func (e *Engine) Draw(screen *ebiten.Image) {
 
 		op.ColorScale.Reset()
 		op.ColorScale.Scale(
-			float32(vis.color.red)/255.0,
-			float32(vis.color.green)/255.0,
-			float32(vis.color.blue)/255.0,
+			float32(vis.fg.red)/255.0,
+			float32(vis.fg.green)/255.0,
+			float32(vis.fg.blue)/255.0,
 			1,
 		)
 		charIndex := vis.char
@@ -50,7 +82,27 @@ func loadTileset(tileSize int) []*ebiten.Image {
 		log.Fatal(err)
 	}
 
-	spriteSheet := ebiten.NewImageFromImage(img)
+	bounds := img.Bounds()
+	transparentImg := image.NewRGBA(bounds)
+
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			pixelColor := img.At(x, y)
+			r, g, b, _ := pixelColor.RGBA()
+
+			// If the pixel is pure black (0, 0, 0)
+			if r == 0 && g == 0 && b == 0 {
+				// Make it fully transparent
+				transparentImg.Set(x, y, color.Transparent)
+			} else {
+				// Keep the original white character pixel
+				transparentImg.Set(x, y, pixelColor)
+			}
+		}
+	}
+
+	// Use our new transparent image instead of the original
+	spriteSheet := ebiten.NewImageFromImage(transparentImg)
 	tiles := make([]*ebiten.Image, 256)
 	tilesPerRow := 32
 

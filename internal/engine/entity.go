@@ -100,8 +100,9 @@ type Renderable interface {
 }
 
 type Visual struct {
-	char  rune
-	color Color
+	char rune
+	fg   Color
+	bg   Color
 }
 
 type Color struct {
@@ -114,6 +115,6 @@ func NewColor(r int, g int, b int) Color {
 	return Color{red: r, green: g, blue: b}
 }
 
-func NewVisual(char rune, color Color) Visual {
-	return Visual{char: char, color: color}
+func NewVisual(char rune, fg Color, bg Color) Visual {
+	return Visual{char: char, fg: fg, bg: bg}
 }

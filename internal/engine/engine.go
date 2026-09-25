@@ -14,12 +14,13 @@ type Engine struct {
 	player       *Player
 	actors       []Actor
 	renderables  []Renderable
+	gameMap      *GameMap
 }
 
 func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int, tileSize int) *Engine {
 	tiles := loadTileset(tileSize)
 
-	pe := NewEntity(gridWidth/2, gridHeight/2, NewVisual('@', NewColor(255, 255, 255)))
+	pe := NewEntity(gridWidth/2, gridHeight/2, NewVisual('@', NewColor(255, 255, 255), NewColor(150, 150, 150)))
 	player := NewPlayer(&pe)
 
 	actors := make([]Actor, 0, 100)
@@ -27,6 +28,9 @@ func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int,
 
 	renderables := make([]Renderable, 0, 100)
 	renderables = append(renderables, player)
+
+	gm := NewGameMap(gridWidth, gridHeight)
+	gm.Fill()
 
 	return &Engine{
 		gridWidth:    gridWidth,
@@ -38,6 +42,7 @@ func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int,
 		player:       player,
 		actors:       actors,
 		renderables:  renderables,
+		gameMap:      gm,
 	}
 }
 
