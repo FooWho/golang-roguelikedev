@@ -25,15 +25,19 @@ func NewGameMap(width int, height int) *GameMap {
 }
 
 func (gm *GameMap) Fill() {
-	tile := NewTile(NewVisual("wall"), true, true)
+	tile := NewTile(NewVisual("floor"), true, true)
 
 	for y := 0; y < gm.height; y++ {
 		for x := 0; x < gm.width; x++ {
-			gm.tiles[y*gm.width+x] = *tile
+			gm.tiles[gm.GetIndex(x, y)] = *tile
 		}
 	}
 }
 
 func (gm *GameMap) InBounds(x int, y int) bool {
 	return x >= 0 && x < gm.width && y >= 0 && y < gm.height
+}
+
+func (gm *GameMap) GetIndex(x int, y int) int {
+	return y*gm.width + x
 }

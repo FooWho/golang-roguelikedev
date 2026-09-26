@@ -3,8 +3,8 @@ package engine
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"image"
-	"image/color"
 	"log"
 
 	"github.com/FooWho/golang-roguelikedev/assets"
@@ -12,75 +12,32 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-var whitePixel *ebiten.Image
-
-func init() {
-	whitePixel = ebiten.NewImage(1, 1)
-	whitePixel.Fill(color.White)
-}
-
 func (e *Engine) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 
-	for y := 0; y < e.gridHeight; y++ {
-		for x := 0; x < e.gridWidth; x++ {
-			tile := e.gameMap.tiles[y*e.gridWidth+x]
-			vis := tile.visual
-
-			op.GeoM.Reset()
-			op.GeoM.Scale(float64(e.tileSize), float64(e.tileSize))
-			op.GeoM.Translate(float64(x*e.tileSize), float64(y*e.tileSize))
-
-			op.ColorScale.Reset()
-			//op.ColorScale.Scale(float32(vis.bg.red)/255.0, float32(vis.bg.green)/255.0, float32(vis.bg.blue)/255.0, 1)
-
-			screen.DrawImage(whitePixel, op)
+	// 1. Draw Map Tiles
+	for y := 0; y < e.gameMap.height; y++ {
+		for x := 0; x < e.gameMap.width; x++ {
+			tile := e.gameMap.tiles[e.gameMap.GetIndex(x, y)]
 
 			op.GeoM.Reset()
 			op.GeoM.Translate(float64(x*e.tileSize), float64(y*e.tileSize))
 
-			op.ColorScale.Reset()
-			//op.ColorScale.Scale(float32(vis.fg.red)/255.0, float32(vis.fg.green)/255.0, float32(vis.fg.blue)/255.0, 1)
-
-			screen.DrawImage(e.tiles[vis.spriteName], op)
+			// Fetch the exact image using the string key!
+			spriteImg := e.spriteSheet.Sprites[tile.visual.spriteName]
+			screen.DrawImage(spriteImg, op)
 		}
 	}
 
+	// 2. Draw Renderables
 	for _, renderable := range e.renderables {
-		vis := renderable.GetVisual()
-
-		op.GeoM.Reset()
-		op.GeoM.Scale(float64(e.tileSize), float64(e.tileSize))
-		op.GeoM.Translate(float64(renderable.GetX()*e.tileSize), float64(renderable.GetY()*e.tileSize))
-
-		op.ColorScale.Reset()
-		op.ColorScale.Scale(
-			float32(vis.bg.red)/255.0,
-			float32(vis.bg.green)/255.0,
-			float32(vis.bg.blue)/255.0,
-			1,
-		)
-		screen.DrawImage(whitePixel, op)
-
 		op.GeoM.Reset()
 		op.GeoM.Translate(float64(renderable.GetX()*e.tileSize), float64(renderable.GetY()*e.tileSize))
 
-		op.ColorScale.Reset()
-		op.ColorScale.Scale(
-			float32(vis.fg.red)/255.0,
-			float32(vis.fg.green)/255.0,
-			float32(vis.fg.blue)/255.0,
-			1,
-		)
-		charIndex := vis.char
-		if charIndex < 0 || int(charIndex) >= len(e.tiles) {
-			charIndex = '?'
-		}
-		tileSprite := e.tiles[charIndex]
-		screen.DrawImage(tileSprite, op)
+		spriteImg := e.spriteSheet.Sprites[renderable.GetVisual().spriteName]
+		screen.DrawImage(spriteImg, op)
 	}
 }
-
 func (e *Engine) Layout(outsideWidth int, outsideHeight int) (int, int) {
 	return e.screenWidth, e.screenHeight
 }
@@ -89,8 +46,16 @@ func (e *Engine) IsOnScreen(x int, y int) bool {
 	return x >= 0 && x < e.gridWidth && y >= 0 && y < e.gridHeight
 }
 
+func NewVisual(name string) Visual {
+	return Visual{spriteName: name}
+}
+
 type Visual struct {
 	spriteName string
+}
+
+func NewSpriteSheet(image *ebiten.Image, sprites map[string]*ebiten.Image) *SpriteSheet {
+	return &SpriteSheet{Image: image, Sprites: sprites}
 }
 
 type SpriteSheet struct {
@@ -111,18 +76,19 @@ func loadTileset(tileSize int) *SpriteSheet {
 	extractSprite := func(name string, gridX, gridY int) {
 		pixelX := gridX * tileSize
 		pixelY := gridY * tileSize
+		fmt.Printf("Loading %s at (%d, %d)\n", name, pixelX, pixelY)
 		rect := image.Rect(pixelX, pixelY, pixelX+tileSize, pixelY+tileSize)
 		sprites[name] = sheet.SubImage(rect).(*ebiten.Image)
 	}
 
 	// Map Tiles
 	extractSprite("wall", 0, 0)  // Example: Top left corner wall block
-	extractSprite("floor", 0, 8) // Example: The blank dark floor tile
+	extractSprite("floor", 8, 0) // Example: The blank dark floor tile
 
 	// Entities
-	extractSprite("player", 0, 24)   // Example: The first human frame
-	extractSprite("skeleton", 0, 16) // Example: The first skeleton frame
-	extractSprite("slime", 4, 18)    // Example: The green slime frame
+	extractSprite("player", 26, 0)   // Example: The first human frame
+	extractSprite("skeleton", 16, 0) // Example: The first skeleton frame
+	extractSprite("slime", 18, 4)    // Example: The green slime frame
 
 	return &SpriteSheet{
 		Image:   sheet,

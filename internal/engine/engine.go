@@ -1,7 +1,7 @@
 package engine
 
 type Engine struct {
-	tiles
+	spriteSheet  *SpriteSheet
 	gridWidth    int
 	gridHeight   int
 	screenWidth  int
@@ -15,9 +15,9 @@ type Engine struct {
 }
 
 func NewEngine(gridWidth int, gridHeight int, tileSize int, artType int) *Engine {
-	tiles := loadTileset(tileSize)
+	spriteSheet := loadTileset(tileSize)
 
-	pe := NewEntity(gridWidth/2, gridHeight/2, NewVisual("hero"))
+	pe := NewEntity(gridWidth/2, gridHeight/2, NewVisual("player"))
 	player := NewPlayer(&pe)
 
 	actors := make([]Actor, 0, 100)
@@ -35,7 +35,7 @@ func NewEngine(gridWidth int, gridHeight int, tileSize int, artType int) *Engine
 		screenWidth:  gridWidth * tileSize,
 		screenHeight: gridHeight * tileSize,
 		tileSize:     tileSize,
-		tiles:        *S,
+		spriteSheet:  spriteSheet,
 		player:       player,
 		actors:       actors,
 		renderables:  renderables,

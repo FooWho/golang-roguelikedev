@@ -69,7 +69,6 @@ func NewPlayer(e *Entity) *Player {
 
 func (p *Player) GetAction(engine *Engine) Action {
 	p.keys = inpututil.AppendJustPressedKeys(p.keys[:0])
-
 	if len(p.keys) == 0 {
 		return nil
 	}
@@ -97,18 +96,4 @@ type Renderable interface {
 	GetX() int
 	GetY() int
 	GetVisual() Visual
-}
-
-type Color struct {
-	red   int
-	green int
-	blue  int
-}
-
-func NewColor(r int, g int, b int) Color {
-	return Color{red: r, green: g, blue: b}
-}
-
-func NewVisual(name string) Visual {
-	return Visual{spriteName: name}
 }

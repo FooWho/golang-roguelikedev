@@ -11,7 +11,7 @@ import (
 var AssetsFS embed.FS
 
 func GetSpriteSheet() []byte {
-	data, err := AssetsFS.ReadFile("Full_2.png")
+	data, err := AssetsFS.ReadFile("Full.png")
 	if err == nil {
 		return data
 	}
