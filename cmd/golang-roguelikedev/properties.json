@@ -1,0 +1,14 @@
+{
+    "gridWidth": {
+        "demonic_dungeon": 80,
+        "ascii": 80
+    },
+    "gridHeight": {
+        "demonic_dungeon": 50,
+        "ascii": 50
+    },
+    "tileSize": {
+        "demonic_dungeon": 16,
+        "ascii": 10
+    }
+}

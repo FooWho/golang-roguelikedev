@@ -1,11 +1,7 @@
 package engine
 
-import (
-	"github.com/hajimehoshi/ebiten/v2"
-)
-
 type Engine struct {
-	tiles        []*ebiten.Image
+	tiles
 	gridWidth    int
 	gridHeight   int
 	screenWidth  int
@@ -15,12 +11,13 @@ type Engine struct {
 	actors       []Actor
 	renderables  []Renderable
 	gameMap      *GameMap
+	artType      int
 }
 
-func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int, tileSize int) *Engine {
+func NewEngine(gridWidth int, gridHeight int, tileSize int, artType int) *Engine {
 	tiles := loadTileset(tileSize)
 
-	pe := NewEntity(gridWidth/2, gridHeight/2, NewVisual('3', NewColor(255, 255, 255), NewColor(0, 0, 0)))
+	pe := NewEntity(gridWidth/2, gridHeight/2, NewVisual("hero"))
 	player := NewPlayer(&pe)
 
 	actors := make([]Actor, 0, 100)
@@ -35,10 +32,10 @@ func NewEngine(gridWidth int, gridHeight int, screenWidth int, screenHeight int,
 	return &Engine{
 		gridWidth:    gridWidth,
 		gridHeight:   gridHeight,
-		screenWidth:  screenWidth,
-		screenHeight: screenHeight,
+		screenWidth:  gridWidth * tileSize,
+		screenHeight: gridHeight * tileSize,
 		tileSize:     tileSize,
-		tiles:        tiles,
+		tiles:        *S,
 		player:       player,
 		actors:       actors,
 		renderables:  renderables,

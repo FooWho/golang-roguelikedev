@@ -32,7 +32,7 @@ func (e *Engine) Draw(screen *ebiten.Image) {
 			op.GeoM.Translate(float64(x*e.tileSize), float64(y*e.tileSize))
 
 			op.ColorScale.Reset()
-			op.ColorScale.Scale(float32(vis.bg.red)/255.0, float32(vis.bg.green)/255.0, float32(vis.bg.blue)/255.0, 1)
+			//op.ColorScale.Scale(float32(vis.bg.red)/255.0, float32(vis.bg.green)/255.0, float32(vis.bg.blue)/255.0, 1)
 
 			screen.DrawImage(whitePixel, op)
 
@@ -40,9 +40,9 @@ func (e *Engine) Draw(screen *ebiten.Image) {
 			op.GeoM.Translate(float64(x*e.tileSize), float64(y*e.tileSize))
 
 			op.ColorScale.Reset()
-			op.ColorScale.Scale(float32(vis.fg.red)/255.0, float32(vis.fg.green)/255.0, float32(vis.fg.blue)/255.0, 1)
+			//op.ColorScale.Scale(float32(vis.fg.red)/255.0, float32(vis.fg.green)/255.0, float32(vis.fg.blue)/255.0, 1)
 
-			screen.DrawImage(e.tiles[vis.char], op)
+			screen.DrawImage(e.tiles[vis.spriteName], op)
 		}
 	}
 
@@ -89,13 +89,18 @@ func (e *Engine) IsOnScreen(x int, y int) bool {
 	return x >= 0 && x < e.gridWidth && y >= 0 && y < e.gridHeight
 }
 
+type Visual struct {
+	spriteName string
+}
+
 type SpriteSheet struct {
 	Image   *ebiten.Image
 	Sprites map[string]*ebiten.Image
 }
 
 func loadTileset(tileSize int) *SpriteSheet {
-	img, _, err := image.Decode(bytes.NewReader(assets.FullSpriteSheet))
+	imgData := assets.GetSpriteSheet()
+	img, _, err := image.Decode(bytes.NewReader(imgData))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -109,10 +114,6 @@ func loadTileset(tileSize int) *SpriteSheet {
 		rect := image.Rect(pixelX, pixelY, pixelX+tileSize, pixelY+tileSize)
 		sprites[name] = sheet.SubImage(rect).(*ebiten.Image)
 	}
-
-	// --- Map your specific sprites ---
-	// Look at the sprite sheet and count the grid cells!
-	// (Assuming 16x16 tiles, adjust gridX/gridY as needed based on the sheet)
 
 	// Map Tiles
 	extractSprite("wall", 0, 0)  // Example: Top left corner wall block

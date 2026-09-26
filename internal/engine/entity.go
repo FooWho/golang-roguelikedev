@@ -99,10 +99,6 @@ type Renderable interface {
 	GetVisual() Visual
 }
 
-type Visual struct {
-	spriteName string
-}
-
 type Color struct {
 	red   int
 	green int
